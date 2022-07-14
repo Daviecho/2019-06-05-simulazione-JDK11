@@ -7,7 +7,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import com.javadocmd.simplelatlng.LatLng;
+import com.javadocmd.simplelatlng.LatLngTool;
+
+import it.polito.tdp.crimes.model.Adiacenza;
+import it.polito.tdp.crimes.model.Distretto;
 import it.polito.tdp.crimes.model.Event;
 
 
@@ -56,5 +62,86 @@ public class EventsDao {
 			return null ;
 		}
 	}
+
+	public List<Distretto> getDistretti(int anno, Map<Integer, Distretto> idMap) {
+		String sql = "SELECT DISTINCT district_id as id, AVG(geo_lat) as lat, AVG(geo_lon) as lon "
+				+ "FROM events "
+				+ "WHERE YEAR(reported_date) = ? "
+				+ "GROUP BY district_id ";
+		
+		try {
+			Connection conn = DBConnect.getConnection() ;
+
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			st.setInt(1, anno);
+			List<Distretto> result = new ArrayList<>() ;
+			
+			ResultSet res = st.executeQuery() ;
+			
+			while(res.next()) {
+				try {
+					int id = res.getInt("id");
+					LatLng posizione = new LatLng(res.getDouble("lat"), res.getDouble("lon"));
+					Distretto d = new Distretto(id, posizione);
+					result.add(d);
+					idMap.put(id, d);
+					
+				} catch (Throwable t) {
+					t.printStackTrace();
+					System.out.println(res.getInt("id"));
+				}
+			}
+			
+			conn.close();
+			return result ;
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null ;
+		}
+	}
+
+	public List<Adiacenza> getArchi(int anno, Map<Integer, Distretto> idMap) {
+		String sql = "SELECT DISTINCT YEAR(reported_date) as anno "
+				+ "FROM events "
+				+ "ORDER BY YEAR(reported_date) ";
+		return null;
+	}
+
+	public List<Integer> getAnni() {
+		String sql = "SELECT DISTINCT YEAR(reported_date) as anno "
+				+ "FROM events "
+				+ "ORDER BY YEAR(reported_date) ";
+		try {
+			Connection conn = DBConnect.getConnection() ;
+
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			
+			List<Integer> result = new ArrayList<>() ;
+			
+			ResultSet res = st.executeQuery() ;
+			
+			while(res.next()) {
+				try {
+					result.add(res.getInt("anno"));
+					
+				} catch (Throwable t) {
+					t.printStackTrace();
+					System.out.println(res.getInt("id"));
+				}
+			}
+			
+			conn.close();
+			return result ;
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null ;
+		}
+	}
+	
+	
 
 }

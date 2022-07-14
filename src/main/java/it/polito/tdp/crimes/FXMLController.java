@@ -7,6 +7,7 @@ package it.polito.tdp.crimes;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.crimes.model.Adiacenza;
 import it.polito.tdp.crimes.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -25,7 +26,7 @@ public class FXMLController {
     private URL location;
 
     @FXML // fx:id="boxAnno"
-    private ComboBox<?> boxAnno; // Value injected by FXMLLoader
+    private ComboBox<Integer> boxAnno; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxMese"
     private ComboBox<?> boxMese; // Value injected by FXMLLoader
@@ -47,7 +48,25 @@ public class FXMLController {
 
     @FXML
     void doCreaReteCittadina(ActionEvent event) {
-
+    	txtResult.clear();
+    	
+    	Integer anno = this.boxAnno.getValue();
+    	if(anno == null) {
+    		txtResult.appendText("Seleziona un anno.");
+    		return;
+    	}
+    	this.model.creaGrafo(anno);
+    	txtResult.appendText("Grafo creato con " +this.model.nVertici() +" vertici e " +this.model.nArchi() +" archi");
+    	for(Adiacenza a: this.model.getAdiacenze()) {
+    		txtResult.appendText(a.toString() +"\n");
+    	}
+//    	for(Adiacenza a1: this.model.getAdiacenze()) {
+//			txtResult.appendText("Adiacenti al distretto " + a1.getD1().getId() +":\n");
+//    		for(Adiacenza a2: this.model.getAdiacenze()) {
+//    			txtResult.appendText(a1.getD1().getId() + " distante " + a2.getDistanza() + "\n");
+//    		}
+//    		txtResult.appendText("\n");
+//    	}
     }
 
     @FXML
@@ -64,10 +83,13 @@ public class FXMLController {
         assert btnSimula != null : "fx:id=\"btnSimula\" was not injected: check your FXML file 'Scene.fxml'.";
         assert txtN != null : "fx:id=\"txtN\" was not injected: check your FXML file 'Scene.fxml'.";
         assert txtResult != null : "fx:id=\"txtResult\" was not injected: check your FXML file 'Scene.fxml'.";
-
+        
     }
     
     public void setModel(Model model) {
     	this.model = model;
+    	this.boxAnno.getItems().addAll(this.model.getAnni());
+    	
+    	
     }
 }
